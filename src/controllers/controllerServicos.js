@@ -19,7 +19,28 @@ exports.cadastraServicos = (req,res) => {
             })
         }
     })
+}
 
+exports.altera_servico = (req, res) => {
+    const database = require("../model/database.js")()
+
+    let nm_servico = req.body.nm_servico
+    let ds_servico = req.body.ds_servico
+    let vl_servico = req.body.vl_servico
+    let cd_servico = req.body.cd_servico
+
+    database.query("UPDATE tb_servico SET nm_Servico = ?, ds_servico = ?, vl_servico = ? WHERE cd_servico = ?", [nm_servico, ds_servico, vl_servico, cd_servico], (err, rows) => {
+        if(err){
+            return res.send({
+                err:err
+            })
+        }
+        else{
+            return res.send({
+                msg: "Serviço alterado com sucesso!"
+            })
+        }
+    })
 }
 
 exports.visualizaServicoUsuario = (req, res) =>{
@@ -37,6 +58,31 @@ exports.visualizaServicoUsuario = (req, res) =>{
                 })
             }
         })
+}
+
+exports.deleta_servico = (req, res) => {
+    const database = require("../model/database.js")()
+    const cd_servico = req.body.cd_servico
+
+    database.query("DELETE FROM tb_avaliacao WHERE cd_servico = ?", cd_servico, (err, rows) => {
+        if(err){
+            return res.send({
+                err: err
+            })
+        }else{
+            database.query("DELETE FROM tb_servico WHERE cd_servico = ?", cd_servico, (err2, rows2) => {
+                if(err2){
+                    return res.send({
+                        err: err2
+                    })
+                }else{
+                    return res.send({
+                        msg: "Ok"
+                    })
+                }       
+            })
+        }
+    })
 }
 
 
@@ -60,7 +106,7 @@ exports.visualizaServicoVisitante = (req, res) =>{
 exports.visualizaServico = (req, res) => { 
     const database = require("../model/database.js")()
     const cd_servico = req.params.cd_servico;
-    database.query(`CALL prVisualizaServico(?)`,cd_servico, (err, rows)=>{
+    database.query(`CALL prExibeServico(?)`,cd_servico, (err, rows)=>{
         if(err){
             return res.send({
                 err:err
@@ -68,11 +114,7 @@ exports.visualizaServico = (req, res) => {
         }
         else{
             return res.send({
-                cd_servico:cd_servico,
-                nm_servico: rows[0].nm_servico,
-                ds_servico: rows[0].ds_servico,
-                vl_servico: rows[0].vl_servico,
-                avaliacao: rows[0].avaliacao
+                servico: rows[0]
             })
         }
     });

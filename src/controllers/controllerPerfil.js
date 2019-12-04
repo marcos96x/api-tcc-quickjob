@@ -1,65 +1,138 @@
-exports.visualizaInformacoes = (req, res) =>{
+exports.troca_cep = (req, res) => {
+  const database = require("../model/database.js")()
+
+  let cep = req.body.cep
+  let cd_usuario = req.body.cd_usuario
+  database.query("UPDATE tb_usuario SET cd_cep = ? WHERE cd_usuario = ?", [cep, cd_usuario], (err, rows) => {
+    if(err){
+      return res.send({
+        err: err
+      })
+    }else{
+      return res.send({msg: "Ok"})
+    }
+  })
+
+}
+
+exports.adiciona_contato = (req, res) => {
+  const database = require("../model/database.js")()
+
+  let cd_usuario = req.body.cd_usuario
+  let tel = req.body.telefone
+  let email = req.body.email_contato
+
+  database.query("INSERT INTO tb_contato VALUES (default, ?, ?, ?)", [tel, email, cd_usuario], (err, rows) => {
+    if(err){
+      return res.send({err: err})
+    }else{
+      return res.send({msg: "ok"})
+    }
+  })
+}
+
+exports.deleta_contato = (req, res) => {
+  const database = require("../model/database.js")()
+
+  let cd_contato = req.params.cd_contato
+
+  database.query("DELETE FROM tb_contato WHERE cd_contato = ?", [cd_contato], (err, rows) => {
+    if(err){
+      return res.send({err: err})
+    }else{
+      return res.send({msg: "ok"})
+    }
+  })
+}
+
+exports.visualiza_usuario = (req, res) => {  
   const database = require("../model/database.js")()
 
   let cd_usuario = req.params.cd_usuario
-  let nm_usuario = req.params.nm_usuario
-  let ds_email = req.params.ds_email
-  let dt_nascimento = req.body.dt_nascimento
-  let tel_usuario = req.body.tel_usuario
-  let cd_cpf = req.body.cd_cpf
-  let cd_cnpj = req.body.cd_cnpj
 
-
-  database.query("SELECT cd_usuario, ds_email, nm_usuario, dt_nascimento, tel_usuario, cd_cpf, cd_cnpj FROM tb_usuario", (err,rows,fields)=>{
-      if(err){
-          return res.send({
-              err:err
-    })
-  }else{
-      return res.send({
-          
+  database.query("SELECT u.nm_usuario, u.ds_email, u.dt_nascimento, u.tel_usuario, u.cd_cep FROM tb_usuario u WHERE u.cd_usuario = ?", cd_usuario, (err, rows) => {
+    if(err){
+      return res.send({err: err})
+    }else{
+      let usuario = rows
+      database.query("SELECT * FROM tb_contato WHERE cd_usuario = ?", cd_usuario, (err2, rows2) => {
+        if(err2){
+          return res.send({err: err2})
+        }else{
+          return res.send({usuario: usuario, contatos: rows2})
+        }
       })
-  }
-
-})
+    }
+  })
 }
 
-exports.alterar = (req, res) =>{
+exports.alterar = (req, res) => {
   const database = require("../model/database.js")()
-  
-    let nm_usuario = req.body.nm_usuario;
-    let dt_nascimento = req.body.dt_nascimento;
-    let nm_cidade = req.body.nm_cidade;
-    let nm_bairro = req.body.nm_bairro;
-    let ds_endereco = req.body.ds_endereco;
-    let ds_email = req.body.ds_email;
-    let ds_senha = req.body.ds_senha;
-    let cpf = req.body.cpf;
-    let cnpj = req.body.cnpj;
-    let cd_login = req.body.cd_login;
 
-    /*SELECT cd_usuario from tb_usuario as u join tb_login as l on l.cd_login = u.cd_login where l.cd_login = ${cd_login}
+  let nm_usuario = req.body.nm_usuario;
+  let dt_nascimento = req.body.dt_nascimento;
+  let ds_email = req.body.ds_email;
+  let cd_usuario = req.body.cd_usuario;
 
-    UPDATE tb_login set ds_email = ${ds_email};
-    UPDATE tb_login set ds_senha = ${ds_senha};
-
-    CPF:    update tb_usuario set nm_usuario = ${nm_usuario}, dt_nascimento = ${dt_nascimento}, cd_cpf = ${cpf} where cd_usuario = 21;
-                                OU
-    CNPJ:   update tb_usuario set nm_usuario = ${nm_usuario}, dt_nascimento = ${dt_nascimento}, cd_cnpj = ${cnpj} where cd_usuario = 21;
-
-    update tb_endereco set nm_logradouro = ${ds_endereco} where cd_endereco = 21;
-    update tb_bairro set nm_bairro = ${nm_bairro} where cd_bairro = 23;
-    update tb_cidade set nm_cidade = ${nm_cidade} where cd_cidade = 14;*/
+  database.query("UPDATE tb_usuario SET nm_usuario = ?, dt_nascimento = ?, ds_email = ? WHERE cd_usuario = ?", [nm_usuario, dt_nascimento, ds_email, cd_usuario], (err, rows) => {
+    if(err){
+      return res.send({err: err})
+    }else{
+      return res.send({msg: "Ok"})
+    }
+  })
 }
 
-exports.empregados = (req, res) =>{
-    const database = require("../model/database.js")()
+exports.troca_senha = (req, res) => {
+  const database = require("../model/database.js")()
 
-  let cd_login = req.params.cd_login;
-  database.query(`SELECT em.cd_empregado from tb_login as l 
-  join tb_usuario as u on u.cd_login = l.cd_login
-      join tb_empregado as em on em.cd_usuario = u.cd_usuario where u.cd_login = ${cd_login};`, function (err,rows,fields) {
-          console.log(rows);
-          return res.send(rows)
-    })
+  let senha_usuario = req.body.senha
+  let nova_senha = req.body.nova_senha
+  let cd_usuario = req.body.cd_usuario;
+
+  database.query("SELECT ds_senha FROM tb_usuario WHERE cd_usuario = ?", cd_usuario, (err2, rows2) => {
+    if(err2){
+      return res.send({err: err2})
+    }else{
+      let senha_banco = rows2[0].ds_senha
+      if(senha_banco == senha_usuario){
+        //ok
+        database.query("UPDATE tb_usuario SET ds_senha = ? WHERE cd_usuario = ?", [nova_senha, cd_usuario], (err, rows) => {
+          if(err){
+            return res.send({err: err})
+          }else{
+            return res.send({msg: "Ok"})
+          }
+        })  
+      }else{
+        return res.send({err: "Senha incorreta"})
+      }
+    }
+  })
+}
+
+exports.visualiza_contato = (req, res) => {
+  const database = require("../model/database.js")()
+
+  let cd_usuario = req.params.cd_usuario
+
+  database.query("SELECT * FROM tb_contato WHERE cd_usuario = ?", cd_usuario, (err, rows) => {
+    if (err) {
+      return res.send({ err: err })
+    } else {
+      if (rows.length == []) {
+        database.query("SELECT tel_usuario, ds_email FROM tb_usuario WHERE cd_usuario = ?", cd_usuario, (err2, rows2) => {
+          if (err2) {
+            return res.send({ err: err2 })
+          } else {
+            return res.send({ contato: rows2 })
+          }
+        })
+      } else {
+        return res.send({ contato: rows })
+      }
+
+    }
+  })
+
 }

@@ -115,14 +115,3 @@ exports.listarbuscar = (req,res) =>{
         }
     });
 }
-
-exports.contadors = (req, res) => {{
-    const database = require("../model/database.js")()
-    let cd_login = req.params.cd_login;
-    database.query(`SELECT count(em.cd_empregado) as contador from tb_servico as s 
-            join tb_empregado as em on em.cd_empregado = s.cd_empregado
-                join tb_usuario as u on u.cd_usuario = em.cd_usuario 
-                    join tb_login as l on l.cd_login = u.cd_login where l.cd_login = ${cd_login};`, function(err, result) {
-                        res.send(result);
-                    })
-}}

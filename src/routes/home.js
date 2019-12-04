@@ -7,5 +7,4 @@ module.exports = app =>{
     app.post("/update", controllerHome.updateServicos);
     app.post("/busca",controllerHome.buscar);
     app.get("/pesquisar/:cd_servico", controllerHome.listarbuscar);
-    app.get("/service/contador/:cd_login", controllerHome.contadors);
 }

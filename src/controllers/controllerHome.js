@@ -39,30 +39,20 @@ exports.visualizaServicos = (req,res) =>{
 exports.visualizaTodosServicos = (req,res) =>{
     const database = require("../model/database.js")()
     
-    database.query(`SELECT cd_servico, ds_servico, em.cd_empregado, nm_servico, vl_servico, cd_key from tb_servico as s join tb_empregado as em on em.cd_empregado = s.cd_empregado join tb_usuario as u on u.cd_usuario = em.cd_usuario order by cd_servico desc;`,(err,rows,fields)=>{
+    database.query(`SELECT * FROM tb_servico`,(err,rows,fields)=>{
         if(err){
             return res.json({
                 erro:err
             }).end()
         }else{
-            if(rows[0] == null){
+            if(rows.length == []){
                 return res.send({
                     msg: "Nenhum serviço cadastrado"
                 });
             }else{
-                database.query(`SELECT count(*) as contador from tb_servico;`,(err,resultado,fields)=>{
-                let contador = resultado[0].contador;
-                let login = req.params.cd_login;
-                database.query(`SELECT nm_usuario from tb_usuario as u join tb_login as l on l.cd_login = u.cd_login where l.cd_login = ${login};`,(err,resultados,fields)=>{
-                if(err) throw err;
-            return res.json({
-                nm_usuario:resultados[0].nm_usuario,
-                ds_servico:rows[0].ds_servico,
-                contador:contador,
-                servicos:rows
-                })
-            })
-        })
+                let servicos = rows
+
+                return res.send({servicos: servicos})
             }
         }
     })
@@ -97,7 +87,7 @@ database.query(`UPDATE tb_servico set nm_servico = "${nm_servico}", ds_servico =
 
 exports.buscar = (req,res) =>{
     const database = require("../model/database.js")()
-    let buscar = req.query.search;
+    let buscar = req.body.busca;
     database.query("CALL prBusca_servico_pelo_nome(?)", buscar, (err, result) => {
     if(err) throw err;
         else{

@@ -86,14 +86,3 @@ exports.avaliacaoServico = (req, res) => {
     });
 
 }
-
-exports.retirarImagem = (req, res) => {
-    const database = require("../model/database.js")()
-    const cd_servico = req.params.cd_servico;
-    database.query(`SELECT cd_key from tb_servico where cd_servico = ${cd_servico};`, function(err, result) {
-        if(err) throw err;
-        else {
-            res.send({url:result});
-        }
-    });
-}

@@ -1,7 +1,7 @@
 module.exports = app =>{
     const host = "localhost"
     const user = "root"
-    const senha = "mencholipa14"
+    const senha = ""
     const db = "db_quickjob"
     const port = 3306
     const mysql = require("mysql")

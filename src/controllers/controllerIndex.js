@@ -9,7 +9,7 @@ exports.login = (req,res) =>{
                 erro:err
             })
         }else{
-            if(rows.length == []){
+            if(rows.length == [] || rows.length == 0){
                 return res.send({
                     msg:"Email ou Senha incorretos"
                 })
@@ -17,10 +17,10 @@ exports.login = (req,res) =>{
                 let cd_usuario = rows[0].cd_usuario
                 let nm_usuario = rows[0].nm_usuario
 
-            return res.send({
-                cd_usuario:cd_usuario,
-                nm_usuario:nm_usuario
-            })
+                return res.send({
+                    cd_usuario:cd_usuario,
+                    nm_usuario:nm_usuario
+                })
             }                  
         }
      })

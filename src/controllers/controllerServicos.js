@@ -1,3 +1,22 @@
+exports.acessos = (req, res) => {
+    const database = require("../model/database.js")()
+
+    let cd_servico = req.body.cd_servico
+
+    database.query("UPDATE tb_servico SET visualizacoes = (SELECT (visualizacoes + 1) FROM tb_servico WHERE cd_servico = ?) FROM tb_servico WHERE cd_servico = ?", [cd_servico, cd_servico], (err, rows) => {
+        if(err){
+            return res.send({
+                err:err
+            })
+        }
+        else{
+            return res.send({
+                msg: "Ok"
+            })
+        }
+    })
+}
+
 exports.cadastraServicos = (req,res) => {
 
     const database = require("../model/database.js")()
@@ -122,9 +141,38 @@ exports.visualizaServico = (req, res) => {
 
 exports.avaliacaoServico = (req, res) => {
     const database = require("../model/database.js")()
-    const cd_servico = req.params.cd_servico;
-    database.query(`select ds_avaliacao from tb_avaliacao as a join tb_servico as s on s.cd_servico = a.cd_servico where s.cd_servico = ${cd_servico};`, function(err, resulta) {
-        return res.send(resulta);
-    });
+
+    let cd_servico = req.body.cd_servico
+    let nota = req.body.nota
+    let msg = req.body.mensagem
+    let cd_usuario = req.body.cd_usuario
+
+    database.query("SELECT * FROM tb_avaliacao WHERE cd_usuario = ? AND cd_servico = ?", [cd_usuario, cd_servico], (err2, rows2) => {
+        if(err2){
+            return res.send({err: err2})
+        }else{
+            if(rows2.lenth == [] || rows2.length == 0){
+                //insere
+                database.query("INSERT INTO tb_avaliacao VALUES (default, ?, ?, ?, ?)", [nota, msg, cd_usuario, cd_servico], (err, rows) => {
+                    if(err){
+                        return res.send({err: err})
+                    }else{
+                        return res.send({msg: "Avaliação registrada com sucesso!"})
+                    }
+                })
+            }else{
+                // altera
+                database.query("UPDATE tb_avaliacao SET nivel_avaliacao = ?, comentario_avaliacao = ? WHERE cd_usuario = ? AND cd_servico = ?", [nota, msg, cd_usuario, cd_servico], (err, rows) => {
+                    if(err){
+                        return res.send({err: err})
+                    }else{
+                        return res.send({msg: "Avaliação alterada com sucesso!"})
+                    }
+                })
+            }
+        }
+    })
+
+    
 
 }

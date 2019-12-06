@@ -3,7 +3,7 @@ exports.acessos = (req, res) => {
 
     let cd_servico = req.body.cd_servico
 
-    database.query("UPDATE tb_servico SET visualizacoes = (SELECT (visualizacoes + 1) FROM tb_servico WHERE cd_servico = ?) FROM tb_servico WHERE cd_servico = ?", [cd_servico, cd_servico], (err, rows) => {
+    database.query("UPDATE tb_servico SET visualizacoes = (SELECT visualizacoes + 1) WHERE cd_servico = ?", [cd_servico, cd_servico], (err, rows) => {
         if(err){
             return res.send({
                 err:err
